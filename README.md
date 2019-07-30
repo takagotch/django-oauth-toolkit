@@ -2,6 +2,8 @@
 ---
 https://github.com/jazzband/django-oauth-toolkit
 
+https://django-oauth-toolkit.readthedocs.io/en/latest/
+
 ```py
 INSTALLED_APPS = (
   'oauth2_provider',
