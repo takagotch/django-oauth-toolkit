@@ -34,10 +34,26 @@ class SongView(views.APIView):
     "DELETE": [["delete"], ["scope2", "scope3"]],
   }
 
+class MyEndpoint(ProtectedResourceView):
+  """
+  """
+  def get(self, request, *args, **kwargs):
+    return HttpResponse('Hello, World!')
 
+class MyScopedEndpoint(ScopedProtectedResourceView):
+  required_scopes = ['can_make_it can_break_it']
+  """
+  """
+  def get(self, request, *args, **kwargs):
+    return HttpResponse('Hello, World!')
 
-
-
+class MyRWEndpoint(ReadWriteScopedResourceView):
+  required_scopes = ['has_additional_powers']
+  """
+  """
+  def get(self, request, *args, **kwargs):
+    return HttpResponse('Hello, World!')
+  
 INSTALLED_APPS = (
   'oauth2_provider',
 )
@@ -105,4 +121,44 @@ paths:
 
 ```
 
+```
+{% extends "oauth2_provider/base.html" %}
 
+{% load i18n %}
+{% block content %}
+  <div class="block-center">
+    {% if not error %}
+      <form id="authorizationForm" method="post">
+        <h3 class="block-center-heading">{% trans "Authorize" %} {{ application.name }}?</h3>
+        {% csrf_token %}
+        
+        {% for field in form %}
+          {% if field.id_hidden %}
+            {{ field }}
+          {% endif %}
+        {% endfor %}
+        
+        <p>{% trans "Application requires following permissions" %}</p>
+        <ul>
+          {% for scope in scopes_descriptions %}
+            <li>{{ scope }}</li>
+          {% endfor %}
+        </ul>
+        
+        {{ form.errors }}
+        {{ form.non_field_errors }}
+        
+        <div class="control-group">
+          <div class="controls">
+            <input type="submit" class="btn btn-large" value="Cancel"/>
+            <input type="submit" class="btn btn-large btn-primary" name="allow" value="Authorize"/>
+          </div>
+        </div>
+      </form>
+    {% else %}
+      <h2>Error: {{ error.error }}</h2>
+      <p>{{ error.description }}</p>
+    {% endif %}
+  </div>
+{% endblock %}
+```
