@@ -61,6 +61,27 @@ INSTALLED_APPS = (
 urlpatterns = [
   url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
+
+from django.db import models
+from oauth2_provider.models import AbstractApplication
+
+class MyApplication(AbstractApplication):
+  logo = models.ImageField()
+  agree = models.BooleanField()
+  
+OAUTH2_PROVIDER_APPLICATION_MODEL='your_app_name.MyApplication'
+
+from oauth2_provider.models import AbstractApplication
+
+class MyApplication(AbstractApplication):
+  def allows_grant_type(self, *grant_types):
+    return bool( set([self.authorization_grant_type, self.GRANT_CLIENT_CREDENTIALS]) & grant_type)
+
+from oauth2_provider.signals import app_authorized
+
+def handle_app_authorized(sender, request, token, **kwargs):
+  print('App {} was authorized'.format(token.application.name))
+app_authorized.connect(handle_app_authorized)
 ```
 
 ```sh
